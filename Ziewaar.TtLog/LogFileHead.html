@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log File FILENAME</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <script type="text/javascript">
+        var intFmt = "0000000000000000";
+        function fmtInt(intValue) {
+            var tooLong = intFmt + intValue;
+            var fixed = tooLong.substr(tooLong.length - intFmt.length);
+            return fixed;
+        }
+
+        var entries = [];
+        (function () {
+            var workingCounter = 1;
+            var targetTable = document.getElementById("log");
+            var interval = null;
+            var prevDate = "";
+            var prevTime = "";
+            var prevLevel = "";
+            interval = setInterval(function () {
+                for (var i = 0; i < 10; i++) {
+                    var currentId = "line" + fmtInt(workingCounter);
+                    var currentLine = document.getElementById(currentId);
+                    if (targetTable) {
+
+                    } else {
+                        targetTable = document.getElementById("log");
+                    }
+                    if (currentLine) {
+                        var rawJsonArray = currentLine.innerHTML;
+                        var valuesArray = JSON.parse(rawJsonArray);
+                        var templateId = valuesArray[0];
+                        var templateRowId = "template" + templateId;
+                        var templateRow = document.getElementById(templateRowId);
+                        var templateRowText = templateRow.innerHTML;
+                        for (var i = valuesArray.length - 1; i >= 1; i--) {
+                            var lookFor = "VALUE" + i;
+                            var replaceWith = "";
+                            if (i > 3 ||
+                                (i == 1 && prevDate != valuesArray[1]) ||
+                                (i == 2 && prevTime != valuesArray[2]) ||
+                                (i == 3 && prevLevel != valuesArray[3])) {
+                                var replaceWith = valuesArray[i];
+                            }
+                            templateRowText = templateRowText.replace(lookFor, replaceWith);
+                        }
+                        prevDate = valuesArray[1];
+                        prevTime = valuesArray[2];
+                        prevLevel = valuesArray[3];
+                        targetTable.insertAdjacentHTML("beforeend", templateRowText);
+                        workingCounter++;
+                    } else {
+                        clearInterval(interval);
+                        return;
+                    }
+                }
+            }, 10);
+        })();
+    </script>
+    <nav>
+    </nav>
+    <content>
+        <table>
+            <tbody id="log">
+
+            </tbody>
+        </table>
+    </content>    

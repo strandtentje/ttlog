@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Ziewaar.TtLog.CoreDemo/Ziewaar.TtLog.CoreDemo.csproj" />
+  <Project Path="Ziewaar.TtLog/Ziewaar.TtLog.csproj" />
+</Solution>

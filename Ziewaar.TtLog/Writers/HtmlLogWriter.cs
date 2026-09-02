@@ -26,13 +26,11 @@ namespace Ziewaar.TtLog.Writers
         public HtmlLogWriter(string targetFile)
         {
             var logStyleSource = Path.Combine(SpecialPaths.AssemblyDirectory, "style.css");
-            var logStyle = Path.Combine(SpecialPaths.LogDirectory, "style.css");
-            if (!File.Exists(logStyle))
-                File.Copy(logStyleSource, logStyle);
+
             this.HtmlWriter = new StreamWriter(targetFile);
             this.HtmlWriter.AutoFlush = false;
             var sanitizedFilename = HttpUtility.HtmlEncode(Path.GetFileName(targetFile));
-            var withReplacedTitle = LogFileHead.Replace("FILENAME", sanitizedFilename);
+            var withReplacedTitle = LogFileHead.Replace("FILENAME", sanitizedFilename).Replace("CSSFILE", File.ReadAllText(logStyleSource));
             this.HtmlWriter.Write(withReplacedTitle);
         }
 

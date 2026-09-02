@@ -85,16 +85,31 @@ namespace Ejije.Logging
             return From(LogLevel.Stop, string.Join(" ", format));
         }
         private static DeferredLogger Instance;
+        private class FakeDisposable : IDisposable
+        {
+            public void Dispose()
+            {
+                
+            }
+        }
+        private static readonly Log 
+            LoggerStarted = Log.Info("Logger into {file} has started"),
+            LoggerAlreadyStarted = Log.Warn("Logger was already started!");
         public static IDisposable Start()
-        {        
-            var InstanceLogFile = SpecialPaths.CurrentLogFile;
-            Instance = new DeferredLogger(new ILogWriter[] { new ConsoleLogWriter(), new HtmlLogWriter(InstanceLogFile) });
-            Instance.Start();
+        {       
+            if (Instance == null)
+            {
+                var InstanceLogFile = SpecialPaths.CurrentLogFile;
+                Instance = new DeferredLogger(new ILogWriter[] { new ConsoleLogWriter(), new HtmlLogWriter(InstanceLogFile) });
+                Instance.Start();
         
-            var LoggerStarted = Log.Info("Logger into {file} has started");
-            Post(LoggerStarted, InstanceLogFile);
-            
-            return Instance;
+                Post(LoggerStarted, InstanceLogFile);            
+                return Instance;
+            } else
+            {
+                Post(LoggerAlreadyStarted);                
+                return new FakeDisposable();
+            }
         }
         public static void Post(
             FormatTemplate template,

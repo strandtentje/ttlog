@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Ziewaar.TtLog.Utilities
 {
@@ -41,7 +42,7 @@ namespace Ziewaar.TtLog.Utilities
                 _customAppName = value;
             }
         }
-        public static string AppData
+        public static string AppDataRoot
         {
             get
             {
@@ -49,14 +50,26 @@ namespace Ziewaar.TtLog.Utilities
                     Environment.SpecialFolder.ApplicationData);
             }
         }
-        public static string EjijeData
+        private static string backingAssyAppdata = null;
+        public static string AppDataForAssy
         {
             get
             {
-                var dir = Path.Combine(AppData, "ejije");
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                return dir;
+                if (backingAssyAppdata == null)
+                {
+                    backingAssyAppdata = Path.Combine(AppDataRoot, AppName);
+                    if (!Directory.Exists(backingAssyAppdata))
+                        Directory.CreateDirectory(backingAssyAppdata);
+                    return backingAssyAppdata;
+                }
+                else
+                {
+                    return backingAssyAppdata;
+                }
+            }
+            set
+            {
+                backingAssyAppdata = value;
             }
         }
         public static string GetDataFile(
@@ -68,7 +81,7 @@ namespace Ziewaar.TtLog.Utilities
             foreach (var item in subDirectory)
                 pathBuilder.Append(item).Append(Path.DirectorySeparatorChar);
             pathBuilder.Append(fileName);
-            var completePath = Path.Combine(AppData, pathBuilder.ToString());
+            var completePath = Path.Combine(AppDataRoot, pathBuilder.ToString());
             var pathDirectory = Path.GetDirectoryName(completePath);
             if (!Directory.Exists(pathDirectory))
                 Directory.CreateDirectory(pathDirectory);
@@ -82,7 +95,7 @@ namespace Ziewaar.TtLog.Utilities
                 Append(Path.DirectorySeparatorChar);
             foreach (var item in subDirectory)
                 pathBuilder.Append(item).Append(Path.DirectorySeparatorChar);
-            var pathDirectory = Path.Combine(AppData, pathBuilder.ToString());
+            var pathDirectory = Path.Combine(AppDataRoot, pathBuilder.ToString());
             if (!Directory.Exists(pathDirectory))
                 Directory.CreateDirectory(pathDirectory);
             return pathDirectory;
@@ -92,7 +105,7 @@ namespace Ziewaar.TtLog.Utilities
         {
             get
             {
-                var dir = Path.Combine(EjijeData, "log");
+                var dir = Path.Combine(AppDataForAssy, "log");
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
                 return dir;

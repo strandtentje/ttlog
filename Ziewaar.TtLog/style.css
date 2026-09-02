@@ -13,12 +13,81 @@ body {
 
 td {
     vertical-align: top;
+    padding: 0.1cm;
+  line-height: 21pt;
 }
 
 content {
-    margin: 0.5cm;
+    margin: 0.5cm auto;
     padding: 0.5cm;
     display: block;
     border: solid 2px #008dd1;
     border-radius: 5px;
+    max-width: 31cm;
+}
+
+span.variable {
+  padding: 0.2cm;
+  background: #303c47;
+}
+
+span.value {
+  color: #b2d476;
+}
+
+td:nth-child(3) {
+  border-right: solid 2px #fefefe;
+}
+
+td:nth-child(4) {
+    border-bottom: solid 2px #26323d;
+  padding-left: 0.5cm;
+}
+tr.Tech {
+  margin: 0.4cm 0;
+}
+
+tr.Tech td:nth-child(2) ~ td {
+  opacity: 0.5;
+}
+
+tr.Tech + :not(tr.Tech) td:nth-child(3) {
+  border-top: solid 2px;
+  border-top-right-radius: 5px;
+  
+}
+
+tr.Tech td:nth-child(3) {
+  color: #008dd1;
+  border-right: solid 2px #008dd1;  
+}
+
+tr.Info td:nth-child(3) {
+  color: #b600d1;
+  border-right: solid 2px #b600d1;  
+}
+
+tr.Cool td:nth-child(3) {
+  color: #00d180;
+  border-right: solid 2px #00d180;    
+}
+
+tr.Warn td:nth-child(3) {
+  color: #bed100;
+  border-right: solid 2px #bed100;    
+}
+
+tr.Oops td:nth-child(3) {
+  color: #d1a300;
+  border-right: solid 2px #d1b300;      
+}
+
+tr.Fail td:nth-child(3) {
+  color: #d13d00;
+  border-right: solid 2px #d13d00;      
+}
+
+tr.Stop td:nth-child(3) {
+  color: #d10041;
+  border-right: solid 2px #d10041;        
 }

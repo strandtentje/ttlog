@@ -39,9 +39,14 @@ td:nth-child(3) {
   border-right: solid 2px #fefefe;
 }
 
+table {
+    table-layout: fixed;
+}
+
 td:nth-child(4) {
     border-bottom: solid 2px #26323d;
   padding-left: 0.5cm;
+  word-break: break-all;
 }
 tr.Tech {
   margin: 0.4cm 0;

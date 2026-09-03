@@ -14,7 +14,10 @@ namespace Ziewaar.TtLog.Writers
     {
         private DateTime LastTimestamp = DateTime.MinValue;
         private LogEvent LastLogEvent = null;
+        public static bool IsTechIgnored = false;
 
+        private LogLevel TemporaryTechLevel = LogLevel.Warn;
+        private bool IsTechTemporarilyExpanded = false;
         private bool TryDividerDifference(DateTime currentTimestamp, LogEvent currentEvent, out CC prevCol, out PreviousEntryCompare pcc)
         {
             if (LastLogEvent == null || LastTimestamp == DateTime.MinValue)
@@ -30,11 +33,11 @@ namespace Ziewaar.TtLog.Writers
                 pcc = PreviousEntryCompare.AllSame;
             }
 
-            if ((LastLogEvent.Template.Level == LogLevel.Tech) != (currentEvent.Template.Level == LogLevel.Tech))
+            if ((LastLogEvent.Template.Level == LogLevel.Tech) && (currentEvent.Template.Level != LogLevel.Tech))
                 pcc |= PreviousEntryCompare.NewGroup | PreviousEntryCompare.CloseGroup;
             if (LastTimestamp.Date != currentTimestamp.Date)
                 pcc |= PreviousEntryCompare.NewDate | PreviousEntryCompare.NewGroup | PreviousEntryCompare.CloseGroup;
-            if (LastTimestamp.TimeOfDay.Seconds != currentTimestamp.TimeOfDay.Seconds || 
+            if (LastTimestamp.TimeOfDay.Seconds != currentTimestamp.TimeOfDay.Seconds ||
                 LastTimestamp.TimeOfDay.Minutes != currentTimestamp.TimeOfDay.Minutes ||
                 LastTimestamp.TimeOfDay.Hours != currentTimestamp.TimeOfDay.Hours)
                 pcc |= PreviousEntryCompare.NewTime | PreviousEntryCompare.NewGroup | PreviousEntryCompare.CloseGroup;
@@ -46,11 +49,8 @@ namespace Ziewaar.TtLog.Writers
         }
 
         private static readonly string
-            GroupOnlyCloser = string.Concat(new string('─', 17), '┘'),
-            NewTimeCloserHead = new string('▄', 6),
-            NewTimeCloserTail = string.Concat(new string('─', 5), '┘'),
-            NewTimeOpenerTail = string.Concat(new string('─', 5), '┐'),
-            DateHead = "yyMMdd", TimeHead = "HHmmss", NoChangeBar = "──────";
+            GroupOnlyCloser = string.Concat('┌', new string('─', 6), '┘'),
+            OpenerTail = string.Concat('└', new string('─', 6), '┐');
 
         private void OptionallyReprintDivider(DateTime currentTimestamp, LogEvent currentEvent, out bool sameDate, out bool sameTime)
         {
@@ -67,14 +67,18 @@ namespace Ziewaar.TtLog.Writers
             if (comparison.HasFlag(PreviousEntryCompare.NewGroup))
             {
                 if (comparison.HasFlag(PreviousEntryCompare.NewDate))
-                    WrapCons.StartQuietPad().WriteQuietPad(CC.Black, CC.Cyan, DateHead);
-                else
-                    WrapCons.StartQuietPad().WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, NoChangeBar);
+                    WrapCons.StartQuietPad().
+                        WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, "│ ").
+                        WriteQuietPad(CC.Black, CC.Cyan, "Date:  ").
+                        WriteQuietPad(CC.Black, CC.Cyan, currentTimestamp.ToString("yy-MM-dd"));
+
                 if (comparison.HasFlag(PreviousEntryCompare.NewTime))
-                    WrapCons.WriteQuietPad(CC.Black, CC.DarkCyan, TimeHead);
-                else
-                    WrapCons.WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, NoChangeBar);
-                WrapCons.WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, NewTimeOpenerTail);
+                    WrapCons.StartQuietPad().
+                        WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, "│ ").
+                        WriteQuietPad(CC.Black, CC.DarkCyan, "Time:  ").
+                        WriteQuietPad(CC.Black, CC.DarkCyan, currentTimestamp.ToString("HH:mm:ss"));
+
+                WrapCons.StartQuietPad().WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, OpenerTail);
             }
         }
 
@@ -83,21 +87,34 @@ namespace Ziewaar.TtLog.Writers
         private static readonly string[] LevelStrings = Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>().Aggregate(
             new string[16], (acc, i) =>
             {
-                acc[(byte)i] = " " + Enum.GetName(typeof(LogLevel), i);
+                acc[(byte)i] = "  " + Enum.GetName(typeof(LogLevel), i) + " ";
                 return acc;
             }, x => x).ToArray();
 
 
         public void Write(DateTime adjustedTimestamp, LogEvent logEvent)
         {
+            if (!IsTechTemporarilyExpanded && logEvent.Template.Level == LogLevel.Tech && IsTechIgnored)
+                return;
+
+            if (logEvent.Template.Level >= TemporaryTechLevel)
+            {
+                IsTechTemporarilyExpanded = true;
+            }
+            else if (logEvent.Template.Level == LogLevel.Tech)
+            {
+
+            } else
+            {
+                IsTechTemporarilyExpanded = false;
+            }
+
             var template = logEvent.Template;
 
             bool sameTime, sameDate;
             OptionallyReprintDivider(adjustedTimestamp, logEvent, out sameDate, out sameTime);
 
             WrapCons.StartPad().
-                WritePad(CC.Black, CC.Cyan, sameDate ? DatePad : adjustedTimestamp.ToString("yyMMdd"), ' ', false).
-                WritePad(CC.Black, CC.DarkCyan, sameTime ? TimePad : adjustedTimestamp.ToString("HHmmss"), ' ', false).
                 WritePad(CC.Black, (CC)template.Level, LevelStrings[(int)template.Level], ' ', false).
                 WritePad(CC.Black, (CC)template.Level, "├", '│', false).
                 WritePad(CC.Black, (CC)template.Level, " ", ' ', false);
@@ -185,7 +202,7 @@ namespace Ziewaar.TtLog.Writers
                 WriteWrapping(CC.Black, badColor, string.Format("  Thrown by: {0}.{1}", targetSiteType, targetSiteName), true, 0);
             if (argEx.InnerException != null)
                 WriteException(badColor, depth + 1, argEx.InnerException);
-            
+
             return WrapCons;
         }
 

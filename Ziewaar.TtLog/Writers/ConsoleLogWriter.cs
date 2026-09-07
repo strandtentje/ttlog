@@ -104,7 +104,8 @@ namespace Ziewaar.TtLog.Writers
             else if (logEvent.Template.Level == LogLevel.Tech)
             {
 
-            } else
+            }
+            else
             {
                 IsTechTemporarilyExpanded = false;
             }
@@ -169,10 +170,30 @@ namespace Ziewaar.TtLog.Writers
                 if (arg != null)
                 {
                     var splitUp = arg.ToString().MakeWrappable().ToArray();
+                    var iOffset = 0;
                     for (int i = 0; i < splitUp.Length; i++)
                     {
                         string item = splitUp[i];
-                        WrapCons.WriteWrapping(CC.Black, valueColor, item, false, i);
+                        if (string.IsNullOrWhiteSpace(item) && item.Contains("\r"))
+                        {
+                            var nextItem = splitUp.ElementAtOrDefault(i + 1);
+                            if (string.IsNullOrWhiteSpace(nextItem) && nextItem?.Contains("\n") == true)
+                                i++;
+                            else if (nextItem == null)
+                                return WrapCons;
+                            WrapCons.WriteWrapping(CC.Black, valueColor, "", true, 0);
+                            iOffset = i;
+                        }
+                        else if (string.IsNullOrWhiteSpace(item) && item.Contains("\n"))
+                        {
+                            var nextItem = splitUp.ElementAtOrDefault(i + 1);
+                            if (nextItem == null)
+                                return WrapCons;
+                        }
+                        else
+                        {
+                            WrapCons.WriteWrapping(CC.Black, valueColor, item, false, i - iOffset);
+                        }
                     }
 
                     return WrapCons;

@@ -57,6 +57,21 @@ namespace Ziewaar.TtLog
 
         public WrappingConsole WriteWrapping(ConsoleColor bg, ConsoleColor fg, string toAppend, bool alwaysBreak, int chainCount)
         {
+            var crlfIndex = toAppend.IndexOf("\r\n");
+            if (crlfIndex >= 0 && crlfIndex < toAppend.Length)
+            {
+                WriteWrapping(bg, fg, toAppend.Substring(0, crlfIndex), false, 0);
+                WriteWrapping(bg, fg, toAppend.Substring(crlfIndex + 2), true, 0);
+                return this;
+            }
+            var lfIndex = toAppend.IndexOf("\n");
+            if (lfIndex >= 0 && lfIndex < toAppend.Length)
+            {
+                WriteWrapping(bg, fg, toAppend.Substring(0, lfIndex), false, 0);
+                WriteWrapping(bg, fg, toAppend.Substring(lfIndex + 1), true, 0);
+                return this;
+            }
+
             if (alwaysBreak || Cursor + toAppend.Length + 1 > COLUMN_COUNT)
             {
                 Console.WriteLine();

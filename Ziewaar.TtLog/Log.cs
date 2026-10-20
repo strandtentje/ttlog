@@ -188,10 +188,13 @@ namespace Ejije.Logging
                 return new FakeDisposable();
             }
         }
+        public static bool IsTechHardMuted { get; set; }
         public static void Post(
             FormatTemplate template,
             params object[] args)
         {
+            if (template.Level == LogLevel.Tech && IsTechHardMuted)
+                return;
             Instance.PostMessage(template, args);
         }
     }

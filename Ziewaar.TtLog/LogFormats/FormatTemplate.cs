@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Ejije.Logging;
 
 namespace Ziewaar.TtLog.LogFormats
 {
@@ -11,11 +12,14 @@ namespace Ziewaar.TtLog.LogFormats
         private static int HandleCounter = 0;
 
         public readonly int Handle;
+        public readonly LogDepartment Department;
         public readonly IEnumerable<FormatComponent> Components;
         public readonly LogLevel Level;
-        public FormatTemplate(LogLevel level, IEnumerable<FormatComponent> components)
+
+        public FormatTemplate(LogDepartment department, LogLevel level, IEnumerable<FormatComponent> components)
         {
             this.Handle = Interlocked.Increment(ref HandleCounter);
+            this.Department = department;
             this.Level = level;
             this.Components = components;
         }

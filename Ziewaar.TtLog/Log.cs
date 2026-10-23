@@ -12,12 +12,17 @@ namespace Ejije.Logging
 {
     public class Log : FormatTemplate
     {
-        private Log(LogLevel level, IEnumerable<FormatComponent> components) : base(level, components)
+        private Log(LogDepartment department, LogLevel level, IEnumerable<FormatComponent> components) : base(
+            department, level, components)
         {
-
         }
 
         public static Log From(LogLevel level, string format)
+        {
+            return From(LogDepartment.Default, level, format);
+        }
+
+        public static Log From(LogDepartment department, LogLevel level, string format)
         {
             List<FormatComponent> components = new List<FormatComponent>();
             int placeholderCount = 0;
@@ -25,75 +30,97 @@ namespace Ejije.Logging
             for (
                 int cursor = 0;
                 cursor < format.Length;
-                )
+            )
             {
                 var component = FormatComponent.From(
                     format, ref placeholderCount, ref cursor);
                 components.Add(component);
             }
-            return new Log(level, components);
+
+            return new Log(department, level, components);
         }
+
         public static Log Cool(string format)
         {
             return From(LogLevel.Cool, format);
         }
+
         public static Log Cool(params string[] format)
         {
             return From(LogLevel.Cool, string.Join(" ", format));
         }
+
         public static Log Oops(params string[] format)
         {
             return From(LogLevel.Oops, string.Join(" ", format));
         }
+
         public static Log Tech(string format)
         {
             return From(LogLevel.Tech, format);
         }
+
+        public static Log Tech(LogDepartment department, string format)
+        {
+            return From(department, LogLevel.Tech, format);
+        }
+
         public static Log Tech(params string[] format)
         {
             return From(LogLevel.Tech, string.Join(" ", format));
         }
+
         public static Log Info(string format)
         {
             return From(LogLevel.Info, format);
         }
+
         public static Log Info(params string[] format)
         {
             return From(LogLevel.Info, string.Join(" ", format));
         }
+
         public static Log Warn(string format)
         {
             return From(LogLevel.Warn, format);
         }
+
         public static Log Warn(params string[] format)
         {
             return From(LogLevel.Warn, string.Join(" ", format));
         }
+
         public static Log Fail(string format)
         {
             return From(LogLevel.Fail, format);
         }
+
         public static Log Fail(params string[] format)
         {
             return From(LogLevel.Fail, string.Join(" ", format));
         }
+
         public static Log Stop(string format)
         {
             return From(LogLevel.Stop, format);
         }
+
         public static Log Stop(params string[] format)
         {
             return From(LogLevel.Stop, string.Join(" ", format));
         }
+
         private static DeferredLogger Instance;
+
         private class FakeDisposable : IDisposable
         {
             public void Dispose()
             {
-
             }
         }
+
         private const long MAX_LOG_DIR_SIZE = 1024 * 1024 * 1024; // a million k's, or a thousand m's, or a single g.
+
         private static readonly Log
             LoggerStarted = Log.Info("Logger into {file} has started"),
             LoggerAlreadyStarted = Log.Warn("Logger was already started!"),
@@ -102,6 +129,7 @@ namespace Ejije.Logging
             PurgedOldZip = Log.Tech("Before starting logger, removed old {logarchive}"),
             PurgeQueryFail = Log.Oops("Before starting logger, failed to query old archives due to {exception}"),
             PurgeFail = Log.Oops("Before starting logger, failed to remove old {archive} due to {exception}");
+
         public static IDisposable Start()
         {
             if (Instance == null)
@@ -137,7 +165,8 @@ namespace Ejije.Logging
                 var toPurge = new FileInfo[] { };
                 try
                 {
-                    var allZipsSorted = new DirectoryInfo(SpecialPaths.LogDirectory).GetFiles("*.log.zip").OrderBy(x => x.Name).ToArray();
+                    var allZipsSorted = new DirectoryInfo(SpecialPaths.LogDirectory).GetFiles("*.log.zip")
+                        .OrderBy(x => x.Name).ToArray();
                     var combinedZipSize = allZipsSorted.Sum(x => x.Length);
 
                     toPurge = allZipsSorted.TakeWhile(x =>
@@ -152,19 +181,22 @@ namespace Ejije.Logging
                         try
                         {
                             item.Delete();
-                        } catch(Exception ex)
+                        }
+                        catch (Exception ex)
                         {
                             deleteExceptions.Add((item.Name, ex));
                         }
                     }
-                } catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     preQueryException = ex;
                 }
 
 
                 var newLogFile = SpecialPaths.CurrentLogFile;
-                Instance = new DeferredLogger(new ILogWriter[] { new ConsoleLogWriter(), new HtmlLogWriter(newLogFile) });
+                Instance = new DeferredLogger(
+                    new ILogWriter[] { new ConsoleLogWriter(), new HtmlLogWriter(newLogFile) });
                 Instance.Start();
 
                 Post(LoggerStarted, newLogFile);
@@ -188,11 +220,13 @@ namespace Ejije.Logging
                 return new FakeDisposable();
             }
         }
+
         public static void Post(
             FormatTemplate template,
             params object[] args)
         {
-            Instance.PostMessage(template, args);
+            if (template.Department.IsEnabled)
+                Instance.PostMessage(template, args);
         }
     }
 }

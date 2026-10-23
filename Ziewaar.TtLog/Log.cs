@@ -221,12 +221,16 @@ namespace Ejije.Logging
             }
         }
 
+        public static bool IsTechHardMuted { get; set; }
         public static void Post(
             FormatTemplate template,
             params object[] args)
         {
             if (template.Department.IsEnabled)
                 Instance.PostMessage(template, args);
+            if (template.Level == LogLevel.Tech && IsTechHardMuted)
+                return;
+            Instance.PostMessage(template, args);
         }
     }
 }

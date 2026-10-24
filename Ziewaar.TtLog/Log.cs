@@ -226,11 +226,10 @@ namespace Ejije.Logging
             FormatTemplate template,
             params object[] args)
         {
-            if (template.Department.IsEnabled)
-                Instance.PostMessage(template, args);
             if (template.Level == LogLevel.Tech && IsTechHardMuted)
                 return;
-            Instance.PostMessage(template, args);
+            if (!template.Department.Mutes.Contains(template.Level))
+                Instance.PostMessage(template, args);
         }
     }
 }

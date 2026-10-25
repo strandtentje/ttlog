@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
@@ -19,7 +21,9 @@ namespace Ziewaar.TtLog.Writers
 
         private LogLevel TemporaryTechLevel = LogLevel.Warn;
         private bool IsTechTemporarilyExpanded = false;
-        private bool TryDividerDifference(DateTime currentTimestamp, LogEvent currentEvent, out CC prevCol, out PreviousEntryCompare pcc)
+
+        private bool TryDividerDifference(DateTime currentTimestamp, LogEvent currentEvent, out CC prevCol,
+            out PreviousEntryCompare pcc)
         {
             if (LastLogEvent == null || LastTimestamp == DateTime.MinValue)
             {
@@ -53,10 +57,12 @@ namespace Ziewaar.TtLog.Writers
             GroupOnlyCloser = string.Concat('┌', new string('─', 6), '┘'),
             OpenerTail = string.Concat('└', new string('─', 6), '┐');
 
-        private void OptionallyReprintDivider(DateTime currentTimestamp, LogEvent currentEvent, out bool sameDate, out bool sameTime)
+        private void OptionallyReprintDivider(DateTime currentTimestamp, LogEvent currentEvent, out bool sameDate,
+            out bool sameTime)
         {
             PreviousEntryCompare comparison;
-            sameDate = true; sameTime = true;
+            sameDate = true;
+            sameTime = true;
             if (!TryDividerDifference(currentTimestamp, currentEvent, out var previousColour, out comparison))
                 return;
             sameDate = !comparison.HasFlag(PreviousEntryCompare.NewDate);
@@ -65,19 +71,18 @@ namespace Ziewaar.TtLog.Writers
             {
                 WrapCons.StartQuietPad().WriteQuietPad(CC.Black, previousColour, GroupOnlyCloser);
             }
+
             if (comparison.HasFlag(PreviousEntryCompare.NewGroup))
             {
                 if (comparison.HasFlag(PreviousEntryCompare.NewDate))
-                    WrapCons.StartQuietPad().
-                        WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, "│ ").
-                        WriteQuietPad(CC.Black, CC.Cyan, "Date:  ").
-                        WriteQuietPad(CC.Black, CC.Cyan, currentTimestamp.ToString("yy-MM-dd"));
+                    WrapCons.StartQuietPad().WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, "│ ")
+                        .WriteQuietPad(CC.Black, CC.Cyan, "Date:  ")
+                        .WriteQuietPad(CC.Black, CC.Cyan, currentTimestamp.ToString("yy-MM-dd"));
 
                 if (comparison.HasFlag(PreviousEntryCompare.NewTime))
-                    WrapCons.StartQuietPad().
-                        WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, "│ ").
-                        WriteQuietPad(CC.Black, CC.DarkCyan, "Time:  ").
-                        WriteQuietPad(CC.Black, CC.DarkCyan, currentTimestamp.ToString("HH:mm:ss"));
+                    WrapCons.StartQuietPad().WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, "│ ")
+                        .WriteQuietPad(CC.Black, CC.DarkCyan, "Time:  ").WriteQuietPad(CC.Black, CC.DarkCyan,
+                            currentTimestamp.ToString("HH:mm:ss"));
 
                 WrapCons.StartQuietPad().WriteQuietPad(CC.Black, (CC)currentEvent.Template.Level, OpenerTail);
             }
@@ -85,6 +90,7 @@ namespace Ziewaar.TtLog.Writers
 
         private static readonly string
             DatePad = new string(' ', 6), TimePad = new string(' ', 6); // ░▒▓█
+
         private static readonly string[] LevelStrings = Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>().Aggregate(
             new string[16], (acc, i) =>
             {
@@ -104,7 +110,6 @@ namespace Ziewaar.TtLog.Writers
             }
             else if (logEvent.Template.Level == LogLevel.Tech)
             {
-
             }
             else
             {
@@ -116,10 +121,9 @@ namespace Ziewaar.TtLog.Writers
             bool sameTime, sameDate;
             OptionallyReprintDivider(adjustedTimestamp, logEvent, out sameDate, out sameTime);
 
-            WrapCons.StartPad().
-                WritePad(CC.Black, (CC)template.Level, LevelStrings[(int)template.Level], ' ', false).
-                WritePad(CC.Black, (CC)template.Level, "├", '│', false).
-                WritePad(CC.Black, (CC)template.Level, " ", ' ', false);
+            WrapCons.StartPad().WritePad(CC.Black, (CC)template.Level, LevelStrings[(int)template.Level], ' ', false)
+                .WritePad(CC.Black, (CC)template.Level, "├", '│', false)
+                .WritePad(CC.Black, (CC)template.Level, " ", ' ', false);
 
             var plainTextColor = template.Level == LogLevel.Tech ? CC.DarkGray : CC.Gray;
             var varBlockColor = template.Level == LogLevel.Tech ? CC.Gray : CC.White;
@@ -130,7 +134,7 @@ namespace Ziewaar.TtLog.Writers
                 if (item.IsPlaceholder)
                 {
                     WrapCons.WriteWrapping(CC.Black, varBlockColor, string.Format("[{0}=", item.Literal), false, 0);
-                    WriteFormattedArg(item, template.Level == LogLevel.Tech, logEvent.Params);
+                    WriteFormattedArg(item, template.Level == LogLevel.Tech, varBlockColor, logEvent.Params);
                     WrapCons.WriteWrapping(CC.Black, varBlockColor, "]", false, 0);
                 }
                 else
@@ -150,7 +154,7 @@ namespace Ziewaar.TtLog.Writers
         }
 
 
-        private WrappingConsole WriteFormattedArg(FormatComponent fmt, bool isMuted, object[] args)
+        private WrappingConsole WriteFormattedArg(FormatComponent fmt, bool isMuted, CC varBlockColor, object[] args)
         {
             var missingColor = isMuted ? CC.DarkYellow : CC.Yellow;
             var valueColor = isMuted ? CC.DarkGreen : CC.Green;
@@ -168,42 +172,77 @@ namespace Ziewaar.TtLog.Writers
                 var argEx = arg as Exception;
                 if (argEx != null)
                     return WriteException(badColor, 0, argEx);
-                if (arg != null)
-                {
-                    var splitUp = arg.ToString().MakeWrappable().ToArray();
-                    var iOffset = 0;
-                    for (int i = 0; i < splitUp.Length; i++)
-                    {
-                        string item = splitUp[i];
-                        if (string.IsNullOrWhiteSpace(item) && item.Contains("\r"))
-                        {
-                            var nextItem = splitUp.ElementAtOrDefault(i + 1);
-                            if (string.IsNullOrWhiteSpace(nextItem) && nextItem?.Contains("\n") == true)
-                                i++;
-                            else if (nextItem == null)
-                                return WrapCons;
-                            WrapCons.WriteWrapping(CC.Black, valueColor, "", true, 0);
-                            iOffset = i;
-                        }
-                        else if (string.IsNullOrWhiteSpace(item) && item.Contains("\n"))
-                        {
-                            var nextItem = splitUp.ElementAtOrDefault(i + 1);
-                            if (nextItem == null)
-                                return WrapCons;
-                        }
-                        else
-                        {
-                            WrapCons.WriteWrapping(CC.Black, valueColor, item, false, i - iOffset);
-                        }
-                    }
 
+                if (arg is string)
+                {
+                    WriteWrapping(arg, valueColor);
                     return WrapCons;
                 }
-                return WrapCons.WriteWrapping(nothingColor, CC.Black, "`null`", false, 0);
+
+                if (arg is IEnumerable items)
+                {
+                    var itemArray = items.OfType<object>().ToArray();
+                    var format = new string('0', itemArray.Length.ToString().Length);
+                    WrapCons.WriteWrapping(CC.Black, CC.DarkCyan, "(", false, 0);
+                    for (int i = 0; i < itemArray.Length; i++)
+                    {
+                        if (i == 0)
+                            WrapCons.WriteWrapping(CC.Black, CC.DarkCyan, i.ToString(format) + ":", false, 0);
+                        else
+                            WrapCons.WriteWrapping(CC.Black, CC.DarkCyan, ", " + i.ToString(format) + ":", false, 0);
+                        if (itemArray[i] == null) 
+                            WrapCons.WriteWrapping(nothingColor, CC.Black, "`null`", false, 0);
+                        else 
+                            WriteWrapping(itemArray[i], valueColor);
+                    }
+
+                    WrapCons.WriteWrapping(CC.Black, CC.DarkCyan, ")", false, 0);
+                    return WrapCons;
+                }
+                else if (arg != null)
+                {
+                    WriteWrapping(arg, valueColor);
+                    return WrapCons;
+                }
+                else
+                {
+                    return WrapCons.WriteWrapping(nothingColor, CC.Black, "`null`", false, 0);
+                }
             }
             catch (Exception ex)
             {
-                return WrapCons.WriteWrapping(badColor, CC.Black, string.Format("Unserializable; {0}", ex.ToString()), false, 0);
+                return WrapCons.WriteWrapping(badColor, CC.Black, string.Format("Unserializable; {0}", ex.ToString()),
+                    false, 0);
+            }
+        }
+
+        private static void WriteWrapping(object arg, ConsoleColor valueColor)
+        {
+            var splitUp = arg.ToString().MakeWrappable().ToArray();
+            var iOffset = 0;
+            for (int i = 0; i < splitUp.Length; i++)
+            {
+                string item = splitUp[i];
+                if (string.IsNullOrWhiteSpace(item) && item.Contains("\r"))
+                {
+                    var nextItem = splitUp.ElementAtOrDefault(i + 1);
+                    if (string.IsNullOrWhiteSpace(nextItem) && nextItem?.Contains("\n") == true)
+                        i++;
+                    else if (nextItem == null)
+                        return;
+
+                    WrapCons.WriteWrapping(CC.Black, valueColor, "", true, 0);
+                    iOffset = i;
+                }
+                else if (string.IsNullOrWhiteSpace(item) && item.Contains("\n"))
+                {
+                    var nextItem = splitUp.ElementAtOrDefault(i + 1);
+                    if (nextItem == null) return;
+                }
+                else
+                {
+                    WrapCons.WriteWrapping(CC.Black, valueColor, item, false, i - iOffset);
+                }
             }
         }
 
@@ -218,10 +257,12 @@ namespace Ziewaar.TtLog.Writers
                     targetSiteType = argEx.TargetSite.DeclaringType.Name;
             }
 
-            WrapCons.
-                WriteWrapping(CC.Black, badColor, string.Format(" {0}:{1}", depth.ToString("000"), argEx.GetType().Name), true, 0).
-                WriteWrapping(CC.Black, badColor, string.Format("  Message: \"{0}\"", argEx.Message), true, 0).
-                WriteWrapping(CC.Black, badColor, string.Format("  Thrown by: {0}.{1}", targetSiteType, targetSiteName), true, 0);
+            WrapCons
+                .WriteWrapping(CC.Black, badColor,
+                    string.Format(" {0}:{1}", depth.ToString("000"), argEx.GetType().Name), true, 0)
+                .WriteWrapping(CC.Black, badColor, string.Format("  Message: \"{0}\"", argEx.Message), true, 0)
+                .WriteWrapping(CC.Black, badColor,
+                    string.Format("  Thrown by: {0}.{1}", targetSiteType, targetSiteName), true, 0);
             if (argEx.InnerException != null)
                 WriteException(badColor, depth + 1, argEx.InnerException);
 
@@ -230,12 +271,10 @@ namespace Ziewaar.TtLog.Writers
 
         public void Dispose()
         {
-
         }
 
         public void Flush()
         {
-
         }
     }
 }

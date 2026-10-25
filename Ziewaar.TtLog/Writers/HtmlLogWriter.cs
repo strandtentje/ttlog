@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Web;
 using Ziewaar.TtLog.LogFormats;
@@ -95,7 +97,32 @@ namespace Ziewaar.TtLog.Writers
                     {
                         try
                         {
-                            ser = item.ToString();
+                            if (item is string strItem)
+                                ser = strItem;
+                            else if (item is IEnumerable actuallyItems)
+                            {
+                                
+                                var itemArray = actuallyItems.OfType<object>().ToArray();
+                                var format = new string('0', itemArray.Length.ToString().Length);
+                                StringBuilder arrSbl = new StringBuilder("(");
+                                for (int i = 0; i < itemArray.Length; i++)
+                                {
+                                    if (i == 0)
+                                        arrSbl.Append(i.ToString(format) + ":");
+                                    else
+                                        arrSbl.Append(", " + i.ToString(format) + ":");
+                                    if (itemArray[i] is object o)
+                                        arrSbl.Append(o);
+                                    else
+                                        arrSbl.Append("`null`");
+                                }
+                                arrSbl.Append(")");
+                                ser = arrSbl.ToString();
+                            }
+                            else
+                            {
+                                ser = item.ToString();
+                            }
                         }
                         catch (Exception ex)
                         {

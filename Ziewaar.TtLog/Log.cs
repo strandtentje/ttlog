@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using Ziewaar.TtLog.LogFormats;
-using Ziewaar.TtLog.Writers;
-using Ziewaar.TtLog.Utilities;
 using System.IO.Compression;
+using System.Linq;
+using Ziewaar.TtLog.LogFormats;
+using Ziewaar.TtLog.Utilities;
+using Ziewaar.TtLog.Writers;
 
-namespace Ejije.Logging
+namespace Ziewaar.TtLog
 {
     public class Log : FormatTemplate
     {

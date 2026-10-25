@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Ziewaar.TtLog.LogFormats;
+using Ziewaar.TtLog.ModifiedConsole;
 using Ziewaar.TtLog.Utilities;
 using static Ziewaar.TtLog.ModifiedConsole.WrappingConsoleSingleton;
 using CC = System.ConsoleColor;

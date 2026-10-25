@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Text;
 
-namespace Ziewaar.TtLog
+namespace Ziewaar.TtLog.ModifiedConsole
 {
     public partial class WrappingConsole
     {

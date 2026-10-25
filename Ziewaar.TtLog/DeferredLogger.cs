@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Ziewaar.TtLog.LogFormats;
-using Ziewaar.TtLog.Writers;
 using Ziewaar.TtLog.Utilities;
+using Ziewaar.TtLog.Writers;
 
-namespace Ejije.Logging
+namespace Ziewaar.TtLog
 {
     public class DeferredLogger : IDisposable
     {

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using Ziewaar.TtLog.LogFormats;
-using Ejije.Logging;
 
 namespace Ziewaar.TtLog.Utilities
 {

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using Ziewaar.TtLog.LogFormats;
-using Ziewaar.TtLog.Utilities;
-using Ziewaar.TtLog.Writers;
+using TtLog.LogFormats;
+using TtLog.Utilities;
+using TtLog.Writers;
 
-namespace Ziewaar.TtLog
+namespace TtLog
 {
     public class DeferredLogger : IDisposable
     {

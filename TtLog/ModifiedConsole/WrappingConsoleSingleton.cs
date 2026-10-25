@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Ziewaar.TtLog.ModifiedConsole
+namespace TtLog.ModifiedConsole
 {
     public static class WrappingConsoleSingleton
     {

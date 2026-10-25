@@ -5,10 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using Ziewaar.TtLog.LogFormats;
-using Ziewaar.TtLog.Utilities;
+using TtLog.LogFormats;
+using TtLog.Utilities;
 
-namespace Ziewaar.TtLog.Writers
+namespace TtLog.Writers
 {
     public class HtmlLogWriter : ILogWriter
     {

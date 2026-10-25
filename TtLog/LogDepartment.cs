@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Ziewaar.TtLog.LogFormats;
+using TtLog.LogFormats;
 
-namespace Ziewaar.TtLog
+namespace TtLog
 {
     public class LogDepartment
     {

@@ -9,7 +9,7 @@ using System.Threading;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Ziewaar.TtLog.Utilities
+namespace TtLog.Utilities
 {
     public static class SpecialPaths
     {

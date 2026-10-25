@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ziewaar.TtLog.Writers
+namespace TtLog.Writers
 {
     [Flags]
     public enum PreviousEntryCompare

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Ziewaar.TtLog.LogFormats
+namespace TtLog.LogFormats
 {
     public class FormatComponent
     {

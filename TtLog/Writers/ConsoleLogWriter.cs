@@ -5,13 +5,13 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Ziewaar.TtLog.LogFormats;
-using Ziewaar.TtLog.ModifiedConsole;
-using Ziewaar.TtLog.Utilities;
-using static Ziewaar.TtLog.ModifiedConsole.WrappingConsoleSingleton;
+using TtLog.LogFormats;
+using TtLog.ModifiedConsole;
+using TtLog.Utilities;
+using static TtLog.ModifiedConsole.WrappingConsoleSingleton;
 using CC = System.ConsoleColor;
 
-namespace Ziewaar.TtLog.Writers
+namespace TtLog.Writers
 {
     public class ConsoleLogWriter : ILogWriter
     {

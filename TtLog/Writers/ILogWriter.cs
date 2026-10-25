@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Ziewaar.TtLog.LogFormats;
+using TtLog.LogFormats;
 
-namespace Ziewaar.TtLog.Writers
+namespace TtLog.Writers
 {
     public interface ILogWriter : IDisposable
     {

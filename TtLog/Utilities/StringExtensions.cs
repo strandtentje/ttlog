@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Globalization;
 
-namespace Ziewaar.TtLog.Utilities
+namespace TtLog.Utilities
 {
     public static class StringExtensions
     {

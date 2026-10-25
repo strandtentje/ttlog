@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using Ziewaar.TtLog.LogFormats;
+using TtLog.LogFormats;
 
-namespace Ziewaar.TtLog.Utilities
+namespace TtLog.Utilities
 {
     public static class LoggingExtensions
     {

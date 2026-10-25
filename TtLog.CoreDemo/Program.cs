@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using Ziewaar.TtLog.ModifiedConsole;
+using TtLog.ModifiedConsole;
 
-namespace Ziewaar.TtLog.CoreDemo;
+namespace TtLog.CoreDemo;
 
 public static class Program
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Ziewaar.TtLog.LogFormats
+namespace TtLog.LogFormats
 {
     public class LogEvent
     {

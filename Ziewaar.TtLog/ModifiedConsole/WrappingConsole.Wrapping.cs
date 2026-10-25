@@ -4,7 +4,7 @@ namespace Ziewaar.TtLog.ModifiedConsole
 {
     public partial class WrappingConsole
     {
-        private const int COLUMN_COUNT = 120;
+        public static int ColumnCount = 120;
 
         private static readonly string
             DatePad = new string('░', 6), TimePad = new string('░', 6);
@@ -69,7 +69,7 @@ namespace Ziewaar.TtLog.ModifiedConsole
                 return this;
             }
 
-            if (alwaysBreak || Cursor + toAppend.Length + 1 > COLUMN_COUNT)
+            if (alwaysBreak || Cursor + toAppend.Length + 1 > ColumnCount)
             {
                 Console.WriteLine();
                 Cursor = TotalPadLength;
@@ -83,7 +83,7 @@ namespace Ziewaar.TtLog.ModifiedConsole
             }
             Console.BackgroundColor = bg;
             Console.ForegroundColor = fg;
-            if (Cursor + toAppend.Length + 1 > COLUMN_COUNT)
+            if (Cursor + toAppend.Length + 1 > ColumnCount)
             {
                 if (toAppend.Length < 30)
                 {
@@ -92,7 +92,7 @@ namespace Ziewaar.TtLog.ModifiedConsole
                     WriteWrapping(bg, fg, toAppend, true, chainCount);
                 } else
                 {
-                    var remainingCapacity = COLUMN_COUNT - Cursor - 2;
+                    var remainingCapacity = ColumnCount - Cursor - 2;
                     Cursor += remainingCapacity;
                     Console.Write(toAppend.Substring(0, remainingCapacity));
                     Console.Write('-');

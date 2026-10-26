@@ -3,12 +3,177 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using TtLog.LogFormats;
 using TtLog.Utilities;
 using TtLog.Writers;
 
 namespace TtLog
 {
+//    public class CliInput : IDisposable
+//    {
+//        private Dictionary<EventWaitHandle, string> CommandReceivers = new Dictionary<EventWaitHandle, string>();
+//        private static EventWaitHandle Disposal = new EventWaitHandle(false, EventResetMode.ManualReset);
+//        private static CliInput Instance = null;
+//        private bool InputBoxActive;
+//        private static readonly object InstanceLock = new object();
+//        public CliInput Start()
+//        {
+//            lock (InstanceLock)
+//            {
+//                if (Instance != null)
+//                    throw new InvalidOperationException("Cli Input already started");
+//                Instance = new CliInput();
+//            }
+
+//            var inputThread = new Thread(Instance.ReadInputs);
+//            inputThread.Start();
+
+
+
+//            return Instance;
+//        }
+
+//        private StringBuilder CommandBuilder = new StringBuilder();
+
+//        private void ReadInputs(object obj)
+//        {
+//            while(TryKeypress(out var keyPress))
+//            {
+//                if (keyPress.Key == ConsoleKey.Oem3)
+//                    this.InputBoxActive = !this.InputBoxActive;
+//                if (keyPress.Key == ConsoleKey.Escape)
+//                    this.InputBoxActive = false;
+//                if (this.InputBoxActive)
+//                {
+//                    if (char.IsLetterOrDigit(keyPress.KeyChar) && CommandBuilder.Length < 65)
+//                    {
+//                        CommandBuilder.Append(keyPress.KeyChar);
+//                        Redraw();
+//                    } else if (keyPress.Key == ConsoleKey.Backspace && CommandBuilder.Length > 0)
+//                    {
+//                        CommandBuilder.Remove(CommandBuilder.Length - 1, 1);
+//                        Redraw();
+//                    } else if (keyPress.Key == ConsoleKey.Enter)
+//                    {
+//                        lock(CommandReceivers)
+//                        {
+//                            var cmd = CommandBuilder.ToString();
+//                            foreach (var ewh in CommandReceivers.Keys.ToArray())
+//                            {
+//                                CommandReceivers[ewh] = cmd;
+//                                ewh.Set();
+//                            }
+//                        }
+//                        this.InputBoxActive = false;
+//                        CommandBuilder.Clear();
+//                        Redraw();
+//                    }
+//                }
+//            }
+//        }
+
+//        private bool TryKeypress(out ConsoleKeyInfo cki)
+//        {
+//            while (!Console.KeyAvailable && Disposal != null && !Disposal.WaitOne(100))
+//            {
+//                Redraw();
+//            }
+//            if (Console.KeyAvailable)
+//            {
+//                cki = Console.ReadKey();
+//                return true;
+//            }
+//            else
+//            {
+//                cki = default;
+//                return false;
+//            }
+//        }
+//        private int LastStringLength, LastWidth, LastHeight;
+
+//        /*
+//        private static readonly string
+//            GroupOnlyCloser = string.Concat('┌', new string('─', 6), '┘'),
+//            OpenerTail = string.Concat('└', new string('─', 6), '┐');
+//*/
+
+//        private void Redraw(bool force = false)
+//        {
+//            if (InputBoxActive == false) return;
+//            if (Console.IsOutputRedirected) return;
+//            if (!force && LastStringLength == CommandBuilder.Length && LastWidth == Console.WindowWidth && LastHeight == Console.WindowHeight)
+//                return;
+//            var oldLeft = Console.CursorLeft;
+//            var oldTop = Console.CursorTop;
+//            Console.CursorLeft = 2;
+//            Console.CursorTop = Console.BufferHeight - 4;
+//            Console.Write("┌{0}┐", new string('─', Console.BufferWidth - 4));
+//            Console.CursorTop = Console.BufferHeight - 3;
+//            var ss = CommandBuilder.ToString();
+//            if (ss.Length > Console.BufferWidth - 8)
+//                ss = ss.Substring(ss.Length - (Console.BufferWidth - 8));
+//            else
+//                ss = ss.PadRight(Console.BufferWidth - 8);
+//            Console.Write("│ {0} │", ss);
+//            Console.CursorTop = Console.BufferHeight - 2;
+//            Console.Write("└{0}┘", new string('─', Console.BufferWidth - 4));
+//            Console.CursorTop = oldTop;
+//            Console.CursorLeft = oldLeft;
+
+//            Console.
+//        }
+
+//        public string ReadCommand()
+//        {
+//            using (var ewh = new EventWaitHandle(false, EventResetMode.ManualReset))
+//            {
+//                string receivedCommand = null;
+//                try
+//                {
+//                    if (CommandReceivers == null) throw new ObjectDisposedException(nameof(CliInput));
+//                    lock (CommandReceivers)
+//                        CommandReceivers.Add(ewh, null);
+//                    while (CommandReceivers.TryGetValue(ewh, out receivedCommand) && !ewh.WaitOne(1000)) ;
+//                }
+//                catch (NullReferenceException)
+//                {
+//                    // ok
+//                }
+//                catch (ObjectDisposedException)
+//                {
+//                    // ok                    
+//                }
+//                finally
+//                {
+//                    if (CommandReceivers != null)
+//                        lock (CommandReceivers)
+//                            CommandReceivers?.Remove(ewh);
+//                }
+//                return receivedCommand;
+//            }
+//        }
+
+//        public void Dispose()
+//        {
+//            var ewhs = CommandReceivers.Keys.ToArray();
+//            if (CommandReceivers == null) throw new ObjectDisposedException(nameof(CliInput));
+//            lock (CommandReceivers)
+//            {
+//                foreach (var ewh in ewhs)
+//                    using (ewh)
+//                        CommandReceivers.Remove(ewh);
+//                CommandReceivers = null;
+//            }
+//            using (Disposal)
+//                Disposal.Set();
+//            Disposal = null;
+//            lock (InstanceLock)
+//                Instance = null;
+//        }
+//    }
+
     public class Log : FormatTemplate
     {
         private Log(LogDepartment department, LogLevel level, IEnumerable<FormatComponent> components) : base(
